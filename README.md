@@ -8,18 +8,38 @@ The Arduino-Music-Box project is inspired by the desire to modernize the nostalg
 
 1. **ESP32 Module**: For wireless connectivity and control logic.
 2. **Photoresistor**: To detect the opening of the music box.
-3. **Small DC Motor**: To rotate the figure inside the music box.
+3. **Small DC Motor**: To rotate the figure inside the music box. *Servor Motor*
 4. **Breadboard and Jumper Wires**: For assembling the circuit.
-5. **Resistors**: To regulate current and voltage in the circuit.
-6. **Speakers**: For music output.
-7. **Power Supply**: To power the ESP32 and other components.
-8. **Miscellaneous (screws, soldering iron, etc.)**: For assembly.
+5. **Resistors**: To regulate current and voltage in the circuit. *10k Ohm resistor (for the photoresistor circuit)*
+6. **Buzzer**: For music output. *Piezo Speaker*
+7. **Power Supply**: To power the ESP32 and other components. 
 
 ### Wiring Instructions
 
-1. **ESP32 to Photoresistor**: Connect one end of the photoresistor to an analog input on the ESP32, and the other end to a resistor connected to the ground. This forms a voltage divider to read the light level.
-2. **ESP32 to Motor**: Connect the motor to a digital output on the ESP32. Use a transistor if the motor requires more current than the ESP32 can provide.
+1. **ESP32 to Photoresistor**: 
+
+   - Choose an analog input pin on the ESP32 for the photoresistor (e.g., GPIO 34).
+   - Place the photoresistor on the breadboard.
+   - Connect one leg of the photoresistor to the GPIO 34. (yellow)
+   - Connect the other leg of the photoresistor to a GND pin on the ESP32. (black)
+   - Add a pull-up resistor to this circuit. Connect one end of a 10k Ohm resistor to the same leg of the photoresistor that's connected to GPIO 34.
+   - Connect the other end of the 10k Ohm resistor to the power pin on the ESP32. (This creates a voltage divider circuit, which is necessary for the analog input to read changes in light accurately.)
+   - Overall just summerize, ESP32 GPIO (e.g., 34) -> Photoresistor one leg, Other leg of Photoresistor -> GND, Also from ESP32 GPIO (34) through 10k Ohm resistor to ESP32 3.3V.
+
+2. **ESP32 to Motor**: Connect the motor to a digital output on the ESP32. (Might need to use a transistor if the motor requires more current than the ESP32 can provide.)
+
+   - Connect the power wire (red) of the servo to the 5V pin on the ESP32.
+   - Connect the ground wire (black) to a GND pin on the ESP32.
+   - Connect the signal wire (yellow) to a digital GPIO pin on the ESP32 (e.g., GPIO 25).
+
 3. **ESP32 to Speakers**: Connect the speakers to the appropriate audio output pins on the ESP32.
+
+   - Connect one lead of the piezo speaker to a digital GPIO pin on the ESP32 (e.g., GPIO 23).
+
+
+   - Connect the other lead to a GND pin on the ESP32.
+   - (Probably need to connect w/ resistor, as last time I nearly burnt the piezo part.)
+
 
 ### Software Setup
 
