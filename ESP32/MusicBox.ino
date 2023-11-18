@@ -1,3 +1,7 @@
+//Currently, the motor must complete a full back and forth before stopping. 
+//The sound also continues until the motor stops.
+//We must fix this
+
 #include <Servo.h>
 //global variables 
 int photoresistor = A0;  //var for storing the photoresistor value
