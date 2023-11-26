@@ -1,7 +1,4 @@
 
-
-
-
 void drawMainPage() {
   background(255); // Set background color
 
@@ -9,6 +6,7 @@ void drawMainPage() {
   image(button1, 50, (height - buttonHeight) / 2);
   image(button2, 200, (height - buttonHeight) / 2);
   image(button3, 350, (height - buttonHeight) / 2);
+  image(button4, 500, (height - buttonHeight) / 2);
 }
 
 
@@ -25,4 +23,14 @@ void drawUploadPage() {
   fill(0);
   text("Click anywhere to upload and play a music file", width / 2, height / 2);
   // Additional UI elements can be added here
+}
+
+
+void drawPlayingPage() {
+  background(150); // Set a different background for the Arduino page
+  fill(0);
+  text("Arduino Control Page", width / 2, height / 2);
+  // Additional UI elements for controlling Arduino
+  song.play(); //<>//
+  analyzeAudioAndExtractFrequencies();
 }

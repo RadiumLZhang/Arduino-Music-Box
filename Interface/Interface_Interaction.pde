@@ -14,7 +14,7 @@ void mousePressed() {
     }
     // Check if Button 3 is clicked
     else if (mouseX > 350 && mouseX < 350 + buttonWidth && mouseY > buttonYTop && mouseY < buttonYBottom) {
-      openSettings();
+      currentPage = PLAYING_PAGE; // Switch to Arduino page
     }
   } else if (currentPage == PIANO_PAGE) {
     // Handle piano page interactions

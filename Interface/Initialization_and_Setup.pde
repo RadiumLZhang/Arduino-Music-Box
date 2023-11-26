@@ -1,23 +1,5 @@
-//import processing.serial.*; // For communication with ESP32
-//import ddf.minim.*;         // Audio library
-//
-//Serial myPort;              // Serial port for ESP32 communication
-//Minim minim;                // Audio manager
-//AudioPlayer player;         // Audio player
-//String[] songList = {"Song1", "Song2", "Song3"}; // Example song list
-//boolean isRecording = false;
-//
-//void setup() {
-//  size(800, 600); // Set window size
-//  println(Serial.list()); // Print available serial ports
-//  myPort = new Serial(this, Serial.list()[0], 9600); // Replace with your ESP32 COM port
-//  minim = new Minim(this);
-//
-//  // UI setup code goes here
-//}
-
 // Main Page
-PImage button1, button2, button3;
+PImage button1, button2, button3, button4;
 int buttonWidth, buttonHeight;
 
 
@@ -37,6 +19,19 @@ import java.awt.Frame;
 SoundFile musicFile;
 String filePath;
 
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+
+Minim minim;
+AudioPlayer song;
+ddf.minim.analysis.FFT fft;
+
+// Playing Page
+int[] tune;
+float[] duration;
+// Variable to keep track of the current number of elements in the arrays
+int currentSize = 0;
+int currentSample = 0;
 
 void setup() {
   size(600, 200); // Adjust the size as needed
@@ -44,8 +39,9 @@ void setup() {
   // Main Page
   // Load images
   button1 = loadImage("Images/piano-button.png");
-  button2 = loadImage("Images/piano-button.png");
-  button3 = loadImage("Images/piano-button.png");
+  button2 = loadImage("Images/upload-button.png");
+  button3 = loadImage("Images/play-button.png");
+  button4 = loadImage("Images/piano-button.png");
 
   // Assuming all buttons are the same size
   buttonWidth = button1.width;
@@ -61,4 +57,8 @@ void setup() {
     }
     oscillators[i].amp(0);
   }
+  
+  // Upload Page
+  minim = new Minim(this);
+  
 }
