@@ -29,6 +29,13 @@ int[] frequencies = {-1, 294, 330, 350, 393, 441, 495, 556, 147, 165, 175, 196, 
 char[] keyMappings = {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'z', 'x', 'c', 'v', 'b', 'n'}; // Map these keys to the piano keys
 int keyWidth;
 
+// Upload Page
+import processing.sound.*;
+import java.awt.FileDialog;
+import java.awt.Frame;
+
+SoundFile musicFile;
+String filePath;
 
 
 void setup() {

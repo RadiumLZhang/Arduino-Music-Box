@@ -19,3 +19,10 @@ void drawPianoPage() {
     rect(i * keyWidth, 0, keyWidth, height);
   }
 }
+
+void drawUploadPage() {
+  background(200); // Set a different background for the upload page
+  fill(0);
+  text("Click anywhere to upload and play a music file", width / 2, height / 2);
+  // Additional UI elements can be added here
+}
