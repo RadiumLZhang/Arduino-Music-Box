@@ -47,6 +47,12 @@ void keyPressed() {
       }
     }
   }
+  if (currentPage == PLAYING_PAGE){
+    if (key == 's' || key == 'S') {
+      // Send the data to Arduino when the 's' key is pressed
+      sendTuneAndDurationToArduino(tune, duration, currentSample);
+    }
+  }
 }
 
 void keyReleased() {

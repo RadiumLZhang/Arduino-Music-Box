@@ -34,11 +34,6 @@ void drawPlayingPage() {
   song.play(); //<>//
   analyzeAudioAndExtractFrequencies();
 
-  // wait music stop playing
-  while (song.isPlaying()) {
-    delay(100);
-  }
+  
 
-  printArray(Serial.list());
-  arduinoPort = new Serial(this, Serial.list()[1], 9600); // Adjust the index [0] as per your serial port
 }
