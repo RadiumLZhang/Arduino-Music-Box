@@ -1,4 +1,4 @@
-int MAX_SAMPLES = 1000000;
+const int MAX_SAMPLES = 100;
 int buzzerPin = 8; // Buzzer connected to pin 8
 int length;
 int tune[MAX_SAMPLES];
