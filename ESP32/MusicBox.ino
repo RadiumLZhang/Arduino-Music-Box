@@ -1,7 +1,4 @@
-//Currently, the motor must complete a full back and forth before stopping. 
-//The sound also continues until the motor stops.
-//We must fix this
-
+//import
 #include <Servo.h>
 //global variables 
 int photoresistor = A0;  //var for storing the photoresistor value
@@ -9,26 +6,25 @@ const int buzzer = 9; //buzzer on pin 9
 int tempo; //var to change the tempo of the buzzer's sound
 Servo myServo; //servo object to control a Servo
 int pos = 0; //var to store the servo position
-bool go = false;
+bool pass = 0;
 
 void setup() {
-  //set the buzzer as output
-  pinMode(buzzer, OUTPUT); 
+  pinMode(buzzer, OUTPUT);//set the buzzer as output
   myServo.attach(10); //attaches the servo on pin 10 to the servo object
-  Serial.begin(9600);           //start a serial connection with the computer
+  Serial.begin(9600); //start a serial connection with the computer
 }
 
 void loop() {
   photoresistor = analogRead(A0); //read value of photoresistor
-  Serial.print("Photoresistor value: ");
-  Serial.println(photoresistor);          //print the photoresistor value to the serial monitor
+  //Serial.print("Photoresistor value: ");
+  //Serial.println(photoresistor); //print the photoresistor value to the serial monitor
 
-  if (photoresistor < 7) {  //if it's dark 
+  if (photoresistor < 7) {  //if it's dark, may have to change 
     stopSound(); //stop sound
     stopFigure(); //stop moving figurine
-  } else if (photoresistor >= 7) { //if it's light
+  } else if (photoresistor >= 7) { //if it's light, may have to change
     playSound(); //play sound
-    Serial.println("sufficient light");
+    //Serial.println("sufficient light");
    	moveFigure(); //move figurine
   }
 
@@ -37,24 +33,40 @@ void loop() {
 
 //helper functions to create sound and movement
 void playSound() {
-  //while (go) {
-    tone(buzzer, 1000); //send 1KHz sound signal
-    //delay(100); //not sure if this is necessary
-    //Serial.println("Buzzer playing");
-  //}
+  tone(buzzer, 1000); //send 1KHz sound signal
+  //delay(100); //not sure if this is necessary
+  //Serial.println("Buzzer playing");
 }
 
 void moveFigure() { //moves back and forth
-    for (pos = 0; pos <= 170; pos = pos + 1) { //around 170 is max for servo
-      myServo.write(pos);
-      delay(10);
-    }
-    for (pos = 170; pos >= 0; pos = pos - 1) {
-      myServo.write(pos);
-      delay(10);
-    }
-  //myServo.write(360); //not using pos because we want continuous movement
-  Serial.println("Servo has been moved");
+  if (pos < 170 && pass == 0) { //first part of motor movement
+    Serial.println("CASE 1");
+    Serial.println(pos);
+    myServo.write(pos);
+    pos = pos + 1; //increment to move motor forward
+    
+  } else if (pos >= 170 && pass == 0) { //peak of motor movement
+    Serial.println("CASE 2");
+    pass = 1; //change to second part of motor movement
+    Serial.println("Entered peak");
+    Serial.println(pos);
+    myServo.write(pos);
+    pos = 169; //decrement to move motor back
+
+  } else if (pos < 170 && pos > 0 && pass == 1) { //second part of motor movement
+    Serial.println("CASE 3");
+    Serial.println(pos);
+    myServo.write(pos);
+    pos = pos - 1; //decrement to move motor back
+    
+  } else if (pos <= 0) {
+    Serial.println("CASE 4");
+    pass = 0; //change to first part of motor movement
+    Serial.println("Entered valley");
+    Serial.println(pos);
+    myServo.write(pos);
+    pos = 1;
+  }
 }
 
 void stopSound() {
@@ -62,5 +74,5 @@ void stopSound() {
 }
 
 void stopFigure() {
-  myServo.write(-95); //no movement
+  myServo.write(pos); //no movement
 }
