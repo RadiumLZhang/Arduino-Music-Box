@@ -31,11 +31,10 @@ void drawPlayingPage() {
   fill(0);
   text("Arduino Control Page", width / 2, height / 2);
   // Additional UI elements for controlling Arduino
-  song.play();
-  if(song.position() < song.length()-1){
+  song.play(); //<>//
+  if(song.position() < song.length()){
+    
     println("song.isPlaying");
-    println("song.position() = " + song.position());
-    println("song.length() = " + song.length());
     analyzeAudioAndExtractFrequencies();
   }
 }

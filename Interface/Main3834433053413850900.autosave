@@ -22,5 +22,11 @@ void draw() {
     break;
   }
 
+  // is song is playing
+  if (song != null && song.isPlaying()) {
+    // draw the spectrum
+    analyzeAudioAndExtractFrequencies();
+  }
+  
   debugFromArduino();
 }
