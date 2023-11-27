@@ -10,3 +10,5 @@
 //    }
 //  }
 //}
+import processing.serial.*;
+Serial arduinoPort;  // Create a Serial object

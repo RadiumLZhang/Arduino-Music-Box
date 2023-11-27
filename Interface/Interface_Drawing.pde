@@ -33,4 +33,10 @@ void drawPlayingPage() {
   // Additional UI elements for controlling Arduino
   song.play(); //<>//
   analyzeAudioAndExtractFrequencies();
+  
+  while(!song.isPlaying()){
+    printArray(Serial.list());
+    arduinoPort = new Serial(this, Serial.list()[1], 9600); // Adjust the index [0] as per your serial port
+    //playMelody();
+  }
 }
