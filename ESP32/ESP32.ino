@@ -3,7 +3,10 @@ const char* ssid     = "I believe Wi can Fi";
 const char* password = "Jirachi666";
 
 // Buzzer pin
-const int buzzerPin = 8; // Change this to a suitable GPIO pin
+Servo myServo;  // Create a servo object
+const int servoPin = 15; // Servo connected to GPIO15
+const int buzzerPin = 8; // Buzzer connected to GPIO5
+const int ldrPin = 4;    // Photoresistor connected to GPIO4
 
 WiFiServer server(80);
 
@@ -64,7 +67,11 @@ float duration[] =
   };
 
 void setup() {
-  pinMode(buzzerPin, OUTPUT);
+
+  myServo.attach(servoPin); // Attach the servo to the specified pin
+  pinMode(buzzerPin, OUTPUT); // Set buzzer pin as an output
+  pinMode(ldrPin, INPUT);     // Set LDR pin as an input
+
   Serial.begin(115200);
 
   // Setup WiFi
@@ -78,7 +85,14 @@ void setup() {
 
 void loop() {
   // Check for incoming data or commands here
-  // ...
+  int ldrStatus = analogRead(ldrPin); // Read the value from the LDR
+
+  if (ldrStatus > 2000) { // Check if the LDR value is above a threshold
+    activateMotorAndBuzzer(); // Activate motor and buzzer
+  } else {
+    deactivateMotorAndBuzzer(); // Deactivate motor and buzzer
+  }
+  delay(100); // Short delay to avoid reading too frequently
 
   // Example: Play a tune
   playTune(tune, duration, sizeof(tune)/sizeof(tune[0]));
