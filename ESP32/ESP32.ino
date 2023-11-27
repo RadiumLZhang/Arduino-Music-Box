@@ -1,4 +1,6 @@
 #include <WiFi.h>
+//const char* ssid     = "I believe Wi can Fi";
+//const char* password = "Jirachi666";
 const char* ssid     = "I believe Wi can Fi";
 const char* password = "Jirachi666";
 
