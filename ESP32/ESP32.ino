@@ -1,66 +1,3 @@
-#ifdef ARDUINO_ARCH_ESP32
-#include "WiFi.h"
-
-// Home WiFi Settings
-const char* home_ssid = "I believe Wi can Fi";
-const char* home_password = "Jirachi666";
-
-// Enterprise Settings
-const char* edu_ssid = "eduroam";
-const char* edu_username = "lzhang793";    // Your Enterprise username
-const char* edu_password = "Vanessa0729";  // Your Enterprise password
-// Select WiFi Network
-bool useEnterprise = false;  // Set to true to connect to Eduroam, false for home WiFi
-
-WiFiServer server(80);
-
-/* Wifi Settings*/
-void connectToHomeWiFi() {
-  Serial.println("Connecting to Home WiFi...");
-  WiFi.begin(home_ssid, home_password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("Connected to Home WiFi");
-}
-
-void connectToEduroam() {
-  Serial.println("Connecting to Eduroam...");
-  WiFi.disconnect(true);
-  delay(1000);
-
-  WiFi.mode(WIFI_STA);
-  esp_wifi_sta_wpa2_ent_set_identity((uint8_t*)edu_username, strlen(edu_username));
-  esp_wifi_sta_wpa2_ent_set_username((uint8_t*)edu_username, strlen(edu_username));
-  esp_wifi_sta_wpa2_ent_set_password((uint8_t*)edu_password, strlen(edu_password));
-  esp_wpa2_config_t config = WPA2_CONFIG_INIT_DEFAULT();
-  esp_wifi_sta_wpa2_ent_enable(&config);
-
-  WiFi.begin(edu_ssid);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("Connected to Eduroam");
-}
-#endif
-
-
-#include <Arduino.h>
-#include <Servo.h>
-
-
-const int servoPin = 9;  // Servo connected to GPIO15
-const int ldrPin = A0;   // Photoresistor connected to A0
-
-// Buzzer pin
-const int buzzerPin = 8;  // Change this to a suitable GPIO pin
-
 #define NOTE_D0 -1
 #define NOTE_D1 294
 #define NOTE_D2 330
@@ -116,94 +53,145 @@ float duration[] =
     0.5, 0.5, 1, 1, 0.5, 0.5, 1, 0.5, 0.25, 0.5, 1, 1, 1, 1, 0.5, 0.5
   };
 
-Servo myServo;  // Create a servo object
+#include <WiFi.h>
+#include "Thread.h"
+#include "ThreadController.h"
+#include <ESP32Servo.h>
+Servo myservo;
+
+// Home WiFi Settings
+const char* home_ssid = "I believe Wi can Fi";
+const char* home_password = "Jirachi666";
+
+// Select WiFi Network
+bool useEnterprise = false;  // Set to true to connect to Eduroam, false for home WiFi
+
+WiFiServer server(80);
+
+/* Wifi Settings*/
+void connectToHomeWiFi() {
+  Serial.println("Connecting to Home WiFi...");
+  WiFi.begin(home_ssid, home_password);
+
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.print(".");
+  // }
+
+  Serial.println("Connected to Home WiFi");
+}
+
+
+// Pin definitions
+const int ldrPin = A0;    // Photoresistor connected to analog pin A0
+const int servoPin = 9;   // Servo motor signal pin
+const int buzzerPin = 8;  // Buzzer signal pin
+
+// Thread objects
+// ThreadController that will control all threads
+ThreadController controller = ThreadController();
+
+// Threads
+Thread checkLightThread = Thread();
+Thread moveServoThread = Thread();
+Thread playTuneThread = Thread();
+
+bool lightSwitch = false;  // Initialize the lightSwitch variable
+
+Servo myServo;
+int servoPosition = 0;
+int servoDirection = 1;  // 1 for increasing, -1 for decreasing
+
+int currentNote = 0;  // Index of the current note
+
+
+int tuneSize = sizeof(tune) / sizeof(tune[0]);  // Number of notes in the tune
+
 void setup() {
 
-  myServo.attach(servoPin);
-#ifdef ARDUINO_ARCH_ESP32
   Serial.begin(115200);
   // ESP32-specific setup
-  pinMode(buzzerPin, OUTPUT);
-  if (useEduroam) {
-    connectToEduroam();
-  } else {
-    connectToHomeWiFi();
-  }
-#else
-  Serial.begin(9600);
-  // Uno-specific setup
-  Serial.println("This is an Uno");
-  pinMode(buzzerPin, OUTPUT);
 
-  // Attach the servo to the specified pin
+  connectToHomeWiFi();
+  playTune();
 
+  // Initialize servo
+  myServo.attach(servoPin);
 
-#endif
+  // Configure and add threads to the controller
+  checkLightThread.onRun(checkLight);
+  checkLightThread.setInterval(100);  // Run every 100 ms
+  controller.add(&checkLightThread);
+
+  moveServoThread.onRun(moveServo);
+  moveServoThread.setInterval(20);  // Run every 20 ms
+  controller.add(&moveServoThread);
+
+  playTuneThread.onRun(playTune);
+  playTuneThread.setInterval(400);  // Run every 400 ms
+  controller.add(&playTuneThread);
 }
 
-bool lightSwitch = false;
+
 void loop() {
-
-  
-  // analog read
-  int ldrValue = analogRead(ldrPin);
-  lightSwitch = ldrValue > 100;
-
-  // Example: Play a tune
-  if (lightSwitch) {
-    activateMotorAndBuzzer();
-  } else {
-    deactivateMotorAndBuzzer();
+  Serial.println("loop");
+  if (!myservo.attached()) {
+    myservo.setPeriodHertz(50);      // standard 50 hz servo
+    myservo.attach(33, 1000, 2000);  // Attach the servo after it has been detatched
   }
-  playTune(tune, duration, sizeof(tune) / sizeof(tune[0]));
-  delay(10000);  // Delay between playbacks
+  myservo.write(0);
+  controller.run();
 }
 
-// Motor
-void activateMotorAndBuzzer() {
-  playTune(tune, duration, sizeof(tune) / sizeof(tune[0]));
-  moveFigure();
-}
+// Thread 1 function to check light level
+void checkLight() {
+  while (true) {
+    // Analog read
+    int ldrValue = analogRead(ldrPin);
 
-void deactivateMotorAndBuzzer() {
-  stopTune();
-  stopFigure();
-}
+    // Check if light level is above a threshold (e.g., 100)
+    lightSwitch = ldrValue > 100;
 
-void playTune(int* tune, float* duration, int length) {
-  for (int x = 0; x < length && lightSwitch; x++)  // Loop through the number of notes
-  {
-    Serial.println("Song is playing...");
-    tone(buzzerPin, tune[x]);  // This function plays each note in the tune array in sequence
+    // You can use the lightSwitch variable for further logic
 
-    delay(400 * duration[x]);  // Duration of each note; adjust the timing here. Larger value for slower speed, smaller for faster speed.
-
-    noTone(buzzerPin);  // Stop the current note before moving to the next one
-  }
-  
-}
-
-void stopTune() {
-  noTone(buzzerPin);
-}
-
-
-int pos = 0;  //var to store the servo position
-
-void moveFigure() {
-  Serial.println("moveFigure");
-  delay(1000);
-  // Loop from 0 to 180
-  for (int i = 0; i <= 180 && lightSwitch; ++i) {
-    myServo.write(i);
-  }
-
-
-  // Loop from 180 to 0
-  for (int i = 180; i >= 0 && lightSwitch; --i) {
-    myServo.write(i);
+    // Check the lightSwitch variable and stop the song and motion if needed
+    if (!lightSwitch) {
+      noTone(buzzerPin);  // Stop playing the tune
+      // Optionally, you can stop the servo motion as well
+      // servoDirection = 0;
+    }
   }
 }
+// Thread 2 function to move servo
+void moveServo() {
+  while (true) {
+    // Check the lightSwitch variable before moving the servo
+    if (lightSwitch) {
+      // Increment or decrement the servo position
+      servoPosition += servoDirection;
 
-void stopFigure() {
+      // Check if we've reached the limits (0 or 180 degrees)
+      if (servoPosition <= 0 || servoPosition >= 180) {
+        servoDirection *= -1;  // Reverse direction
+      }
+
+      // Move the servo to the current position
+      myServo.write(servoPosition);
+    }
+  }
+}
+// Thread 3 function to play the tune
+void playTune() {
+  while (true) {
+    // Check if it's time to play the next note and if the lightSwitch is true
+    if (currentNote < tuneSize && lightSwitch) {
+      tone(buzzerPin, tune[currentNote]);
+      delay(400 * duration[currentNote]);
+      noTone(buzzerPin);  // Stop playing the note
+      currentNote++;
+    } else {
+      // Reset the note index to replay the tune
+      currentNote = 0;
+    }
+  }
 }

@@ -64,6 +64,6 @@ void setup() {
   
   // Playing Page
   printArray(Serial.list());
-  arduinoPort = new Serial(this, Serial.list()[1], 9600); // Adjust the index [0] as per your serial port
+  arduinoPort = new Serial(this, Serial.list()[1], 115200); // Adjust the index [0] as per your serial port
   
 }
